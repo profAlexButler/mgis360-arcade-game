@@ -63,9 +63,10 @@ function shootLaser() {
             yv: -LASER_SPD * Math.sin(ship.a) / FPS,
             dist: 0
         });
+        // Prevent further shooting until cooldown
+        ship.canShoot = false;
+        ship.shootTime = 0;
     }
-    // Prevent further shooting
-    ship.canShoot = false;
 }
 
 /**
@@ -74,11 +75,10 @@ function shootLaser() {
 const keys = {};
 document.addEventListener("keydown", (e) => {
     keys[e.code] = true;
-    if (e.code === "Space") {
-        shootLaser();
-    }
 });
-document.addEventListener("keyup", (e) => keys[e.code] = false);
+document.addEventListener("keyup", (e) => {
+    keys[e.code] = false;
+});
 
 /**
  * GAME LOOP
@@ -95,6 +95,10 @@ function update() {
         ship.rot = -SHIP_TURN_SPEED / 180 * Math.PI / FPS;
     }
     ship.thrusting = (keys['ArrowUp'] || keys['KeyW']);
+    
+    if (keys['Space']) {
+        shootLaser();
+    }
 
     // 2. Draw Background
     ctx.fillStyle = "black";
@@ -133,7 +137,6 @@ function update() {
         ship.shootTime++;
         if (ship.shootTime > LASER_COOLDOWN * FPS) {
             ship.canShoot = true;
-            ship.shootTime = 0;
         }
     }
 
